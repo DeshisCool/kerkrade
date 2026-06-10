@@ -246,6 +246,219 @@
   }
   .skip-arrow { font-size: 11px; color: rgba(255,255,255,0.5); transition: transform 0.2s ease; }
 
+  /* ══ CHAPTER SUB-MENU ══ */
+  #chapNav { overflow: visible; }
+
+  .chap-sub {
+    position: absolute;
+    top: 100%;          /* geen gap — padding overbrugt visuele ruimte */
+    left: -8px;
+    z-index: 200;
+    padding-top: 12px;  /* bridge: cursor blijft in hover-zone tijdens overgang */
+    opacity: 0; pointer-events: none;
+    transform: translateY(-4px);
+    /* Vertraging bij uitfaden zodat cursor tijd heeft naar sub-items te bewegen */
+    transition: opacity 0.25s ease 0.25s, transform 0.25s ease 0.25s;
+  }
+  .chap:hover .chap-sub,
+  #ch1.expanded .chap-sub {
+    opacity: 1; pointer-events: all; transform: translateY(0);
+    transition: opacity 0.2s ease 0s, transform 0.2s ease 0s; /* direct tonen */
+  }
+
+  .sub-connector {
+    width: 1px; height: 12px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.15));
+    margin-left: 4px;
+  }
+  .sub-items { display: flex; flex-direction: column; gap: 4px; }
+
+  .sub-item {
+    display: flex; align-items: center; gap: 0;
+    cursor: pointer; position: relative;
+    padding: 3px 0;
+  }
+  .sub-branch {
+    display: flex; align-items: center; gap: 0; flex-shrink: 0;
+  }
+  .sub-branch-line {
+    width: 12px; height: 1px; background: rgba(255,255,255,0.2);
+  }
+  .sub-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.4);
+    background: transparent; flex-shrink: 0;
+    transition: all 0.2s; margin-right: 8px;
+  }
+  .sub-item:hover .sub-dot {
+    background: #fff; border-color: #fff;
+    box-shadow: 0 0 7px rgba(255,255,255,0.5);
+  }
+  .sub-label {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: 8px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(255,255,255,0.45); transition: color 0.2s; white-space: nowrap;
+  }
+  .sub-item:hover .sub-label { color: rgba(255,255,255,0.95); }
+
+  /* Thumbnail */
+  .sub-thumb {
+    position: absolute;
+    left: calc(100% + 14px);
+    top: 50%; transform: translateY(-50%);
+    width: 215px; height: 131px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+    border: 0.5px solid rgba(255,255,255,0.18);
+    overflow: hidden; background: #0a0a0a;
+  }
+  .sub-item:hover .sub-thumb { opacity: 1; }
+  .sub-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.82; display: block; }
+  .sub-thumb-caption {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.82));
+    padding: 18px 10px 8px;
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+  }
+
+  /* ══ CIRCLE RING around active chapter (Last Hijack style) ══ */
+  .chap.active { cursor: pointer; }
+  .chap.active::before {
+    content: '';
+    position: absolute;
+    top: -22px; left: 50%; transform: translateX(-50%);
+    width: 54px; height: 54px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.55);
+    box-shadow: 0 0 14px rgba(255,255,255,0.08);
+    pointer-events: none;
+    animation: ringFade 0.5s ease forwards;
+  }
+  @keyframes ringFade { from { opacity: 0; transform: translateX(-50%) scale(0.85); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+
+  /* ══ LEFT COLUMN ANCHOR (timer + controls stacked) ══ */
+  #leftCol {
+    position: fixed; bottom: 2.2rem; left: 5vw; z-index: 60;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  }
+  #voTimer {
+    opacity: 0; pointer-events: none; transition: opacity 0.6s ease;
+  }
+  #voTimer.visible { opacity: 1; }
+  #bottomLeft {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+    opacity: 0; transition: opacity 0.7s ease; pointer-events: none;
+  }
+  #bottomLeft.visible { opacity: 1; pointer-events: all; }
+
+  .util-btn {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    background: rgba(0,0,0,0.45); border: 0.5px solid rgba(255,255,255,0.18);
+    border-radius: 2px; padding: 6px 14px; cursor: pointer; width: 100%;
+    text-align: left;
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+  }
+  .util-btn:hover, .util-btn.active-btn {
+    color: #fff; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.45);
+  }
+
+  #fsBtn {
+    width: 100%; height: 32px;
+    background: rgba(0,0,0,0.45); border: 0.5px solid rgba(255,255,255,0.18);
+    border-radius: 2px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; padding: 0 14px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  #fsBtn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.45); }
+  #fsBtn svg { width: 12px; height: 12px; stroke: rgba(255,255,255,0.55); fill: none; stroke-width: 2; }
+
+  /* ══ CHAPTER — allow hover interaction on ALL states ══ */
+  .chap { cursor: pointer; }
+  .chap.upcoming { opacity: 0.28; }
+  .chap.upcoming:hover { opacity: 0.6; }
+  /* Sub-menu opens on hover regardless of chapter state */
+  .chap:hover .chap-sub { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+  /* ══ CIRCULAR VO TIMER — onderdeel van #leftCol ══ */
+  #timerSvg { width: 52px; height: 52px; transform: rotate(-90deg); }
+  #timerTrack { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 2; }
+  #timerArc {
+    fill: none; stroke: rgba(255,255,255,0.65); stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 138.2;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear;
+  }
+  #timerInner {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #timerLabel {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.7);
+  }
+  #voTimerWrap { position: relative; width: 52px; height: 52px; }
+
+  /* ══ OVERLAY PANELS (HELP / ABOUT) ══ */
+  .panel-overlay {
+    position: fixed; inset: 0; z-index: 150;
+    background: rgba(0,0,0,0.88);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .panel-overlay.open { opacity: 1; pointer-events: all; }
+
+  .panel {
+    position: relative; max-width: 560px; width: 90vw;
+    padding: 3rem 3rem 2.5rem;
+    border: 0.5px solid rgba(255,255,255,0.15);
+  }
+  .panel-close {
+    position: absolute; top: 1.2rem; right: 1.4rem;
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.4); cursor: pointer;
+    background: none; border: none; padding: 0;
+    transition: color 0.2s;
+  }
+  .panel-close:hover { color: #fff; }
+  .panel-title {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: clamp(28px, 5vw, 44px); letter-spacing: -0.01em;
+    text-transform: uppercase; color: #fff; margin-bottom: 1.8rem; line-height: 0.9;
+  }
+  .panel-section { margin-bottom: 1.4rem; }
+  .panel-section-title {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: rgba(255,255,255,0.35); margin-bottom: 0.5rem;
+  }
+  .panel-text {
+    font-family: 'Cormorant Garamond', serif; font-weight: 300;
+    font-size: clamp(14px, 1.5vw, 16px); color: rgba(255,255,255,0.65);
+    line-height: 1.65; letter-spacing: 0.02em;
+  }
+  .panel-divider {
+    width: 32px; height: 1px; background: rgba(255,255,255,0.2);
+    margin: 1.4rem 0;
+  }
+  .help-steps { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .help-steps li {
+    display: flex; gap: 14px; align-items: baseline;
+    font-family: 'Cormorant Garamond', serif; font-weight: 300;
+    font-size: clamp(14px, 1.5vw, 16px); color: rgba(255,255,255,0.65); line-height: 1.5;
+  }
+  .help-steps li span {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.3); flex-shrink: 0; padding-top: 2px;
+  }
+
   #fade {
     position: fixed; inset: 0; background: #000;
     z-index: 300; opacity: 1;
@@ -258,6 +471,73 @@
 
 <div id="fade"></div>
 
+<!-- Background music (loops across all screens including hero) -->
+<audio id="bgMusic" loop preload="auto" style="display:none">
+  <source src="music.mp4" type="video/mp4">
+</audio>
+
+<!-- Left column: timer on top, controls below -->
+<div id="leftCol">
+  <div id="voTimer">
+    <div id="voTimerWrap">
+      <svg id="timerSvg" viewBox="0 0 52 52">
+        <circle id="timerTrack" cx="26" cy="26" r="22"/>
+        <circle id="timerArc"   cx="26" cy="26" r="22"/>
+      </svg>
+      <div id="timerInner"><span id="timerLabel">–:––</span></div>
+    </div>
+  </div>
+  <div id="bottomLeft">
+    <button class="util-btn" id="btnHelp"  onclick="togglePanel('helpPanel')">Help</button>
+    <button class="util-btn" id="btnAbout" onclick="togglePanel('aboutPanel')">About</button>
+    <button id="fsBtn" onclick="toggleFullscreen()" title="Fullscreen">
+      <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- HELP overlay -->
+<div class="panel-overlay" id="helpPanel">
+  <div class="panel">
+    <button class="panel-close" onclick="togglePanel('helpPanel')">Sluiten ✕</button>
+    <h2 class="panel-title">Help</h2>
+    <ul class="help-steps">
+      <li><span>Start</span>Klik, scroll of swipe omhoog om het verhaal te beginnen.</li>
+      <li><span>Navigeer</span>Gebruik de tijdlijn bovenaan om tussen hoofdstukken te gaan.</li>
+      <li><span>Verdiep</span>Hover over "De Opdracht" voor verdiepende sub-hoofdstukken met achtergrond.</li>
+      <li><span>Skip</span>Gebruik de skip-knop linksonder om een scherm over te slaan.</li>
+      <li><span>Timer</span>De balk onderaan toont hoe lang de huidige VO-sequentie nog duurt.</li>
+      <li><span>Scherm</span>Gebruik de fullscreen-knop rechtsonder voor de beste ervaring.</li>
+    </ul>
+    <div class="panel-divider"></div>
+    <p class="panel-text" style="font-size:11px; color:rgba(255,255,255,0.25);">
+      Gemaakt met HTML, CSS &amp; JavaScript · Zuyd Hogeschool CMD 2026
+    </p>
+  </div>
+</div>
+
+<!-- ABOUT overlay -->
+<div class="panel-overlay" id="aboutPanel">
+  <div class="panel">
+    <button class="panel-close" onclick="togglePanel('aboutPanel')">Sluiten ✕</button>
+    <h2 class="panel-title">Over dit<br>project</h2>
+    <div class="panel-section">
+      <p class="panel-section-title">De opdracht</p>
+      <p class="panel-text">Gemeente Kerkrade en MSI vroegen ons te onderzoeken waarom sociale ondersteuningsdiensten de bewoners die ze het hardst nodig hebben niet bereiken. Wat begon als een communicatievraag, bleek al snel iets dieper te gaan.</p>
+    </div>
+    <div class="panel-divider"></div>
+    <div class="panel-section">
+      <p class="panel-section-title">Het team</p>
+      <p class="panel-text">Studenten Communication &amp; Multimedia Design<br>Zuyd Hogeschool · Maastricht · 2025–2026</p>
+    </div>
+    <div class="panel-divider"></div>
+    <div class="panel-section">
+      <p class="panel-section-title">Opdrachtgevers</p>
+      <p class="panel-text">Gemeente Kerkrade · MSI (Maatschappelijke Steunsystemen)</p>
+    </div>
+  </div>
+</div>
+
 <!-- Chapter navigation -->
 <nav id="chapNav">
   <div class="nav-wrap">
@@ -265,6 +545,38 @@
     <div class="chap upcoming" id="ch1" data-ch="1">
       <div class="chap-dot"></div>
       <div class="chap-label"><span class="chap-num">01</span>De Opdracht</div>
+
+      <!-- Sub-menu: zichtbaar bij hover + na VO -->
+      <div class="chap-sub" id="ch1sub">
+        <div class="sub-connector"></div>
+        <div class="sub-items">
+
+          <div class="sub-item">
+            <div class="sub-branch">
+              <div class="sub-branch-line"></div>
+              <div class="sub-dot"></div>
+            </div>
+            <span class="sub-label">Geschiedenis</span>
+            <div class="sub-thumb">
+              <img src="https://images.pexels.com/photos/1486785/pexels-photo-1486785.jpeg?auto=compress&cs=tinysrgb&w=215&h=131&fit=crop" alt="Geschiedenis Kerkrade">
+              <div class="sub-thumb-caption">Geschiedenis van de wijk</div>
+            </div>
+          </div>
+
+          <div class="sub-item">
+            <div class="sub-branch">
+              <div class="sub-branch-line"></div>
+              <div class="sub-dot"></div>
+            </div>
+            <span class="sub-label">Huidige Cijfers</span>
+            <div class="sub-thumb">
+              <img src="https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=215&h=131&fit=crop" alt="Huidige Cijfers">
+              <div class="sub-thumb-caption">Cijfers over de wijk</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
     <div class="chap upcoming" id="ch2" data-ch="2">
       <div class="chap-dot"></div>
@@ -290,15 +602,6 @@
   <span class="skip-label" id="skipLabel">Volgende</span>
   <span class="skip-arrow">→</span>
 </button>
-<audio id="cityAudio" loop preload="auto" style="display:none">
-  <source src="city-ambience.mp4" type="video/mp4">
-</audio>
-
-<!-- Cinematic music -->
-<audio id="musicAudio" loop preload="auto" style="display:none">
-  <source src="music.mp4" type="video/mp4">
-</audio>
-
 <!-- ══════════ SCREEN 1 — HERO ══════════ -->
 <div class="screen active" id="s1">
   <video class="bg-video active" id="s1v1" muted playsinline loop>
@@ -410,7 +713,6 @@ const fadeOv = document.getElementById('fade');
 async function goTo(n) {
   if (transitioning || n === currentScreen) return;
   transitioning = true;
-  if (n === 2) Audio.init(); // zeker stellen ook bij auto-transitie
   fadeOv.style.transition = 'opacity 0.7s ease';
   fadeOv.style.opacity = '1';
   await wait(700);
@@ -421,9 +723,9 @@ async function goTo(n) {
   fadeOv.style.opacity = '0';
   await wait(900);
   transitioning = false;
-  Audio.setScreen(n);
   updateNav(n);
   updateSkip(n);
+  if (n >= 2) showUtil();
   if (n === 2) runS2();
   if (n === 3) runS3();
 }
@@ -536,83 +838,134 @@ async function runS3() {
   subEl.classList.add('on');
   await wait(1200);
 
+  startVoTimer();
+
   for (const item of voLines) {
     await showVO(item);
   }
+
+  stopVoTimer();
+  document.getElementById('ch1').classList.add('expanded');
 }
-
-/* ══════════════════════════════════════
-   AUDIO ENGINE — twee echte audiobestanden
-   city-ambience.mp4  +  music.mp4
-   Muziek start op scherm 2, stad erbij op scherm 3
-══════════════════════════════════════ */
-const Audio = {
-  city: null, music: null, ready: false,
-
-  init() {
-    if (this.ready) return;
-    this.ready = true;
-    this.city  = document.getElementById('cityAudio');
-    this.music = document.getElementById('musicAudio');
-    this.city.volume  = 0;
-    this.music.volume = 0;
-  },
-
-  _fade(el, to, ms) {
-    if (!el) return;
-    const from = el.volume;
-    const steps = 60, tick = ms / steps, delta = (to - from) / steps;
-    let i = 0;
-    const id = setInterval(() => {
-      el.volume = Math.min(1, Math.max(0, el.volume + delta));
-      if (++i >= steps) { el.volume = to; clearInterval(id); }
-    }, tick);
-  },
-
-  setScreen(n) {
-    if (!this.ready) return;
-    if (n === 2) {
-      this.music.play().catch(() => {});
-      this._fade(this.music, 0.20, 2500);
-    }
-    if (n === 3) {
-      this.city.play().catch(() => {});
-      this._fade(this.city,  0.14, 2500);
-      this._fade(this.music, 0.12, 1500);
-    }
-  }
-};
 
 /* ══════════════════════════════════════
    CHAPTER NAV
 ══════════════════════════════════════ */
-// Mapping: scherm → hoofdstuk (1-gebaseerd)
-const screenToChapter = { 2: 1, 3: 1 }; // scherm 2 en 3 zijn beide hoofdstuk 1
+const screenToChapter = { 2: 1, 3: 1 };
 
 function updateNav(screenNum) {
-  const nav    = document.getElementById('chapNav');
-  const fill   = document.getElementById('navFill');
-  const chaps  = document.querySelectorAll('.chap');
+  const nav   = document.getElementById('chapNav');
+  const fill  = document.getElementById('navFill');
+  const chaps = document.querySelectorAll('.chap');
   const active = screenToChapter[screenNum] || 0;
 
-  if (screenNum >= 2) {
-    nav.classList.add('visible');
-  } else {
-    nav.classList.remove('visible');
-    return;
-  }
+  if (screenNum >= 2) { nav.classList.add('visible'); }
+  else { nav.classList.remove('visible'); return; }
 
   chaps.forEach(ch => {
     const n = parseInt(ch.dataset.ch);
     ch.classList.remove('active', 'visited', 'upcoming');
-    if (n === active)   ch.classList.add('active');
+    if (n === active)    ch.classList.add('active');
     else if (n < active) ch.classList.add('visited');
     else                 ch.classList.add('upcoming');
   });
+  fill.style.width = ((active - 1) / 4 * 100) + '%';
+}
 
-  // Vullijn: percentage van actief hoofdstuk t.o.v. totaal
-  const pct = ((active - 1) / 4) * 100; // 5 hoofdstukken → 4 gaps
-  fill.style.width = pct + '%';
+/* ══ BOTTOM-LEFT CONTROLS VISIBILITY ══ */
+function showUtil() {
+  document.getElementById('bottomLeft').classList.add('visible');
+}
+
+/* ══ OVERLAYS ══ */
+function togglePanel(id) {
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.panel-overlay').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.util-btn').forEach(b => b.classList.remove('active-btn'));
+  if (!isOpen) {
+    el.classList.add('open');
+    const btn = id === 'helpPanel' ? document.getElementById('btnHelp')
+                                   : document.getElementById('btnAbout');
+    if (btn) btn.classList.add('active-btn');
+  }
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.panel-overlay').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.util-btn').forEach(b => b.classList.remove('active-btn'));
+  }
+});
+
+/* ══ FULLSCREEN ══ */
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+  else document.exitFullscreen().catch(() => {});
+}
+document.addEventListener('fullscreenchange', () => {
+  const svg = document.querySelector('#fsBtn svg');
+  if (document.fullscreenElement) {
+    svg.innerHTML = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>';
+  } else {
+    svg.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>';
+  }
+});
+
+/* ══ BACKGROUND MUSIC ══ */
+const bgMusic = document.getElementById('bgMusic');
+let musicStarted = false;
+
+function startMusic() {
+  if (musicStarted) return;
+  musicStarted = true;
+  bgMusic.volume = 0.28;
+  bgMusic.play().then(() => {}).catch(() => {
+    // Als autoplay geblokkeerd: probeer opnieuw bij volgende interactie
+    musicStarted = false;
+  });
+}
+
+// Probeer direct te starten (werkt in sommige browsers)
+window.addEventListener('load', () => {
+  bgMusic.volume = 0.28;
+  bgMusic.play().then(() => { musicStarted = true; }).catch(() => {});
+});
+
+// Fallback: start bij eerste gebruikersinteractie
+['click','keydown','touchstart'].forEach(evt =>
+  document.addEventListener(evt, startMusic, { passive: true })
+);
+
+/* ══ VO TIMER — SVG cirkel ══ */
+const CIRCUMFERENCE = 2 * Math.PI * 22; // 138.23
+const VO_TOTAL_MS   = 20 * 4550;
+let voTimerInterval = null, voStartTime = null;
+
+function startVoTimer() {
+  const wrap  = document.getElementById('voTimer');
+  const arc   = document.getElementById('timerArc');
+  const label = document.getElementById('timerLabel');
+  arc.style.strokeDasharray  = CIRCUMFERENCE;
+  arc.style.strokeDashoffset = 0;
+  wrap.classList.add('visible');
+  voStartTime = Date.now();
+
+  voTimerInterval = setInterval(() => {
+    const remaining = Math.max(0, VO_TOTAL_MS - (Date.now() - voStartTime));
+    const progress  = remaining / VO_TOTAL_MS;
+    arc.style.strokeDashoffset = CIRCUMFERENCE * (1 - progress);
+    const m = Math.floor(remaining / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
+    label.textContent = `${m}:${String(s).padStart(2, '0')}`;
+    if (remaining <= 0) stopVoTimer();
+  }, 1000);
+}
+function stopVoTimer() {
+  clearInterval(voTimerInterval);
+  const el = document.getElementById('voTimer');
+  el.style.transition = 'opacity 1s ease';
+  el.style.opacity = '0';
+  setTimeout(() => { el.classList.remove('visible'); el.style.opacity = ''; }, 1000);
 }
 
 /* ══ SKIP BUTTON ══ */
@@ -622,16 +975,11 @@ function updateSkip(screenNum) {
   const btn   = document.getElementById('skipBtn');
   const label = document.getElementById('skipLabel');
   const next  = skipLabels[screenNum];
-  if (next) {
-    label.textContent = next;
-    btn.classList.add('visible');
-  } else {
-    btn.classList.remove('visible');
-  }
+  if (next) { label.textContent = next; btn.classList.add('visible'); }
+  else      { btn.classList.remove('visible'); }
 }
 
 function skipScreen() {
-  Audio.init(); // zeker stellen dat audio klaarstaat
   if (currentScreen === 1) goTo(2);
   else if (currentScreen === 2) goTo(3);
 }
@@ -639,36 +987,31 @@ function skipScreen() {
 /* ══ NAVIGATION ══ */
 let clickLock = false;
 document.addEventListener('click', e => {
-  if (e.target.closest('#skipBtn'))  return; // skip button handled separately
-  if (e.target.closest('#chapNav'))  return; // nav handled separately
+  if (e.target.closest('#skipBtn'))    return;
+  if (e.target.closest('#chapNav'))    return;
+  if (e.target.closest('#bottomLeft')) return;
+  if (e.target.closest('.panel-overlay')) return;
   if (currentScreen === 1 && !clickLock) {
-    Audio.init();
-    clickLock = true;
-    goTo(2);
+    clickLock = true; goTo(2);
     setTimeout(() => clickLock = false, 2500);
   }
 });
 let wheelLock = false;
 document.addEventListener('wheel', e => {
   if (wheelLock || currentScreen !== 1) return;
-  if (e.deltaY > 30) {
-    Audio.init();
-    goTo(2); wheelLock = true; setTimeout(() => wheelLock = false, 2500);
-  }
+  if (e.deltaY > 30) { goTo(2); wheelLock = true; setTimeout(() => wheelLock = false, 2500); }
 }, { passive: true });
 let ty0 = 0;
 document.addEventListener('touchstart', e => { ty0 = e.touches[0].clientY; }, { passive: true });
 document.addEventListener('touchend', e => {
-  if (currentScreen === 1 && ty0 - e.changedTouches[0].clientY > 40) {
-    Audio.init(); goTo(2);
-  }
+  if (currentScreen === 1 && ty0 - e.changedTouches[0].clientY > 40) goTo(2);
 });
 
 /* ══ BOOT ══ */
 window.addEventListener('load', async () => {
-  await wait(200);
-  fadeOv.classList.add('off');
-  await wait(700);
+  fadeOv.style.transition = 'none';
+  fadeOv.style.opacity = '0';
+  await wait(100);
   updateSkip(1);
   runS1();
 });
