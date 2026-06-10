@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Op zoek naar elkaar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;900&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
+
+  /* ══ SCREENS ══ */
+  .screen {
+    position: fixed; inset: 0;
+    width: 100vw; height: 100vh;
+    opacity: 0; pointer-events: none;
+    transition: opacity 1.0s ease;
+  }
+  .screen.active { opacity: 1; pointer-events: all; }
+
+  /* ══ SHARED VIDEO BG ══ */
+  .bg-video {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0; z-index: 1;
+    transition: opacity 1.6s ease-in-out;
+  }
+  .bg-video.active { opacity: 0.65; }
+
+  .grad {
+    position: absolute; inset: 0; z-index: 2;
+    background: linear-gradient(170deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.38) 45%, rgba(0,0,0,0.68) 100%);
+  }
+  .noise {
+    position: absolute; inset: 0; z-index: 3; opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  /* Typewriter cursor */
+  .cursor {
+    display: inline-block; width: 3px; background: #fff;
+    margin-left: 3px; animation: blink 0.75s step-end infinite;
+    vertical-align: baseline; height: 0.82em; position: relative; top: 0.05em;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ══ SCREEN 1 — HERO ══ */
+  #s1 .hero-content {
+    position: absolute; z-index: 10;
+    bottom: 12vh; left: 5vw; max-width: 820px;
+  }
+  .main-title {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: clamp(64px, 11vw, 148px);
+    line-height: 0.92; letter-spacing: -0.01em;
+    text-transform: uppercase; color: #fff;
+    margin-bottom: 1.6rem;
+    opacity: 0; transition: opacity 0.5s ease; min-height: 1.85em;
+  }
+  .main-title.on { opacity: 1; }
+  .hero-sub {
+    font-family: 'Cormorant Garamond', serif; font-weight: 300;
+    font-size: clamp(15px, 1.8vw, 20px);
+    color: rgba(255,255,255,0.60); letter-spacing: 0.03em; line-height: 1.65;
+    opacity: 0; transform: translateY(12px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  .hero-sub.on { opacity: 1; transform: translateY(0); }
+  .hero-bottom {
+    position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+    z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    opacity: 0; transition: opacity 0.8s ease;
+  }
+  .hero-bottom.on { opacity: 1; }
+  .swipe-label {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: 10px; letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.30); text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 1px; height: 36px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:.35;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.12)} }
+
+  /* ══ SCREEN 2 — DE OPDRACHT ══ */
+  #s2 { background: #000; }
+  .beat {
+    position: absolute; left: 7vw; top: 50%;
+    transform: translateY(-50%); width: 86vw;
+  }
+  .op-title {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: clamp(68px, 12vw, 160px);
+    line-height: 0.88; letter-spacing: -0.01em;
+    text-transform: uppercase; color: #fff;
+    opacity: 0; transition: opacity 0.4s ease; min-height: 1.1em;
+  }
+  .op-title.on { opacity: 1; }
+  .op-sub {
+    font-family: 'Cormorant Garamond', serif; font-weight: 300; font-style: italic;
+    font-size: clamp(14px, 1.5vw, 18px); color: rgba(255,255,255,0.45);
+    letter-spacing: 0.04em; margin-top: 1rem;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .op-sub.on { opacity: 1; transform: translateY(0); }
+  .op-quote {
+    font-family: 'Cormorant Garamond', serif; font-weight: 300; font-style: italic;
+    font-size: clamp(18px, 2.2vw, 28px);
+    color: rgba(255,255,255,0.80); line-height: 1.6; letter-spacing: 0.02em;
+    max-width: 680px; opacity: 0; transition: opacity 0.4s ease; min-height: 1.5em;
+  }
+  .op-quote.on { opacity: 1; }
+  .op-attr {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: 11px; letter-spacing: 0.25em;
+    color: rgba(255,255,255,0.28); text-transform: uppercase;
+    margin-top: 1.4rem; opacity: 0; transition: opacity 0.8s ease 0.3s;
+  }
+  .op-attr.on { opacity: 1; }
+
+  /* ══ SCREEN 3 — KERKRADE LIMBURG ══ */
+  #s3 .grad {
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.20) 38%,
+      rgba(0,0,0,0.62) 70%, rgba(0,0,0,0.92) 100%);
+  }
+  .kerk-title-block {
+    position: absolute; z-index: 10; bottom: 24vh; left: 5vw;
+  }
+  .kerk-title {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: clamp(52px, 9vw, 120px);
+    line-height: 0.9; letter-spacing: -0.01em;
+    text-transform: uppercase; color: #fff;
+    opacity: 0; transition: opacity 0.4s ease; min-height: 1.1em;
+  }
+  .kerk-title.on { opacity: 1; }
+  .kerk-sub {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 400;
+    font-size: clamp(13px, 1.4vw, 18px);
+    color: rgba(255,255,255,0.55); letter-spacing: 0.06em; margin-top: 0.7rem;
+    opacity: 0; transition: opacity 0.7s ease;
+  }
+  .kerk-sub.on { opacity: 1; }
+
+  /* VO subtitle box */
+  #voBox {
+    position: absolute; z-index: 10;
+    bottom: 5vh; left: 50%; transform: translateX(-50%);
+    width: 72vw; text-align: center; pointer-events: none;
+  }
+  .vo-line {
+    font-family: 'Cormorant Garamond', serif; font-weight: 300; font-style: italic;
+    font-size: clamp(16px, 1.9vw, 24px);
+    color: rgba(255,255,255,0.85); letter-spacing: 0.03em; line-height: 1.55;
+    opacity: 0; transition: opacity 0.55s ease;
+    text-shadow: 0 1px 10px rgba(0,0,0,0.9); min-height: 1.6em;
+  }
+  .vo-line.on { opacity: 1; }
+
+  /* ══ CHAPTER NAV — top timeline ══ */
+  #chapNav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 50;
+    padding: 18px 5vw 14px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 100%);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.9s ease;
+  }
+  #chapNav.visible { opacity: 1; pointer-events: all; }
+
+  .nav-wrap {
+    position: relative;
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+
+  /* background line */
+  .nav-wrap::before {
+    content: ''; position: absolute;
+    left: 0; right: 0; top: 5px;
+    height: 1px; background: rgba(255,255,255,0.18);
+  }
+  /* progress fill line */
+  #navFill {
+    position: absolute; left: 0; top: 5px;
+    height: 1px; background: rgba(255,255,255,0.7);
+    width: 0%; transition: width 0.9s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .chap {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 9px; cursor: default;
+    transition: opacity 0.4s;
+    position: relative; z-index: 1;
+  }
+  .chap.visited  { cursor: pointer; opacity: 0.55; }
+  .chap.active   { cursor: default; opacity: 1; }
+  .chap.upcoming { opacity: 0.25; cursor: default; }
+
+  .chap-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.55);
+    background: transparent;
+    transition: all 0.35s ease;
+  }
+  .chap.active   .chap-dot { background: #fff; border-color: #fff; width: 9px; height: 9px; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+  .chap.visited  .chap-dot { background: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.6); }
+  .chap:hover.visited .chap-dot { background: #fff; border-color: #fff; }
+
+  .chap-label {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: clamp(7px, 0.85vw, 10px);
+    letter-spacing: 0.18em; text-transform: uppercase; color: #fff;
+    white-space: nowrap; text-align: center;
+    line-height: 1.3;
+  }
+  .chap-num {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: 9px; color: rgba(255,255,255,0.35);
+    letter-spacing: 0.1em; display: block; margin-bottom: 1px;
+  }
+
+  /* ══ SKIP BUTTON ══ */
+  #skipBtn {
+    position: fixed; bottom: 2.2rem; left: 5vw; z-index: 60;
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(0,0,0,0.45); border: 0.5px solid rgba(255,255,255,0.22);
+    border-radius: 2px; padding: 10px 18px 10px 14px;
+    cursor: pointer; opacity: 0;
+    transition: opacity 0.6s ease, border-color 0.2s, background 0.2s;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  #skipBtn.visible { opacity: 1; }
+  #skipBtn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+  #skipBtn:hover .skip-arrow { transform: translateX(3px); }
+  .skip-label {
+    font-family: 'Roboto Condensed', sans-serif; font-weight: 900;
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+  }
+  .skip-arrow { font-size: 11px; color: rgba(255,255,255,0.5); transition: transform 0.2s ease; }
+
+  #fade {
+    position: fixed; inset: 0; background: #000;
+    z-index: 300; opacity: 1;
+    transition: opacity 1.0s ease; pointer-events: none;
+  }
+  #fade.off { opacity: 0; }
+</style>
+</head>
+<body>
+
+<div id="fade"></div>
+
+<!-- Chapter navigation -->
+<nav id="chapNav">
+  <div class="nav-wrap">
+    <div id="navFill"></div>
+    <div class="chap upcoming" id="ch1" data-ch="1">
+      <div class="chap-dot"></div>
+      <div class="chap-label"><span class="chap-num">01</span>De Opdracht</div>
+    </div>
+    <div class="chap upcoming" id="ch2" data-ch="2">
+      <div class="chap-dot"></div>
+      <div class="chap-label"><span class="chap-num">02</span>In Gesprek</div>
+    </div>
+    <div class="chap upcoming" id="ch3" data-ch="3">
+      <div class="chap-dot"></div>
+      <div class="chap-label"><span class="chap-num">03</span>Het Echte<br>Probleem</div>
+    </div>
+    <div class="chap upcoming" id="ch4" data-ch="4">
+      <div class="chap-dot"></div>
+      <div class="chap-label"><span class="chap-num">04</span>Vertrouwen</div>
+    </div>
+    <div class="chap upcoming" id="ch5" data-ch="5">
+      <div class="chap-dot"></div>
+      <div class="chap-label"><span class="chap-num">05</span>Ons Verhaal</div>
+    </div>
+  </div>
+</nav>
+
+<!-- Skip button -->
+<button id="skipBtn" onclick="skipScreen()">
+  <span class="skip-label" id="skipLabel">Volgende</span>
+  <span class="skip-arrow">→</span>
+</button>
+<audio id="cityAudio" loop preload="auto" style="display:none">
+  <source src="city-ambience.mp4" type="video/mp4">
+</audio>
+
+<!-- Cinematic music -->
+<audio id="musicAudio" loop preload="auto" style="display:none">
+  <source src="music.mp4" type="video/mp4">
+</audio>
+
+<!-- ══════════ SCREEN 1 — HERO ══════════ -->
+<div class="screen active" id="s1">
+  <video class="bg-video active" id="s1v1" muted playsinline loop>
+    <source src="https://videos.pexels.com/video-files/19329330/19329330-uhd_2560_1440_24fps.mp4" type="video/mp4">
+  </video>
+  <video class="bg-video" id="s1v2" muted playsinline loop>
+    <source src="https://videos.pexels.com/video-files/29052852/12558344_2560_1440_24fps.mp4" type="video/mp4">
+  </video>
+  <div class="grad"></div><div class="noise"></div>
+  <div class="hero-content">
+    <h1 class="main-title" id="s1title"></h1>
+    <p class="hero-sub" id="s1sub">
+      Hoe zorgen we ervoor dat inwoners hun stem laten horen,<br>
+      als juist zij het moeilijkst te bereiken zijn?
+    </p>
+  </div>
+  <div class="hero-bottom" id="s1bot">
+    <span class="swipe-label">Swipe om het verhaal te verkennen</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN 2 — DE OPDRACHT ══════════ -->
+<div class="screen" id="s2">
+  <div class="beat" id="b1">
+    <h2 class="op-title" id="s2title"></h2>
+    <p class="op-sub" id="s2sub">Dit project is een samenwerking van hogeschool Zuyd &amp; MSI</p>
+  </div>
+  <div class="beat" id="b2" style="display:none;">
+    <p class="op-quote" id="s2quote"></p>
+    <p class="op-attr" id="s2attr">Onderzoeksvraag · Zuyd Hogeschool</p>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN 3 — KERKRADE LIMBURG ══════════ -->
+<div class="screen" id="s3">
+  <!--
+    vid index → source
+    0: city street (Amsterdam)
+    1: drone woonwijk
+    2: people walking sidewalk
+    3: solar panels drone
+    4: design team brainstorming
+  -->
+  <!-- v0: Drone city street + row houses — K / Pexels -->
+  <video class="bg-video active" id="v0" muted playsinline loop>
+    <source src="https://videos.pexels.com/video-files/14480814/14480814-uhd_2560_1440_24fps.mp4" type="video/mp4">
+  </video>
+  <!-- v1: Drone peaceful residential neighborhood — David McBee / Pexels -->
+  <video class="bg-video" id="v1" muted playsinline loop>
+    <source src="https://videos.pexels.com/video-files/5031099/5031099-uhd_2560_1440_30fps.mp4" type="video/mp4">
+  </video>
+  <video class="bg-video" id="v2" muted playsinline loop>
+    <source src="https://videos.pexels.com/video-files/854100/854100-hd_1920_1080_25fps.mp4" type="video/mp4">
+  </video>
+  <video class="bg-video" id="v3" muted playsinline loop>
+    <source src="https://videos.pexels.com/video-files/15046856/15046856-uhd_2730_1440_24fps.mp4" type="video/mp4">
+  </video>
+  <video class="bg-video" id="v4" muted playsinline loop>
+    <source src="https://videos.pexels.com/video-files/7693405/7693405-hd_1920_1080_25fps.mp4" type="video/mp4">
+  </video>
+
+  <div class="grad"></div><div class="noise"></div>
+
+  <div class="kerk-title-block">
+    <h2 class="kerk-title" id="s3title"></h2>
+    <p class="kerk-sub" id="s3sub">45.800 inwoners &nbsp;&nbsp; Op de grens met Duitsland</p>
+  </div>
+
+  <div id="voBox">
+    <p class="vo-line" id="voLine"></p>
+  </div>
+</div>
+
+<script>
+/* ══ UTILS ══ */
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+function typewriter(el, text, speed = 55) {
+  return new Promise(resolve => {
+    el.innerHTML = '';
+    const cur = document.createElement('span');
+    cur.className = 'cursor';
+    el.appendChild(cur);
+    let i = 0;
+    const t = setInterval(() => {
+      if (i < text.length) {
+        const ch = text[i++];
+        el.insertBefore(ch === '\n' ? document.createElement('br') : document.createTextNode(ch), cur);
+      } else {
+        clearInterval(t);
+        setTimeout(() => { cur.style.display = 'none'; resolve(); }, 650);
+      }
+    }, speed);
+  });
+}
+
+async function fadeEl(el, dir, dur = 600) {
+  el.style.transition = `opacity ${dur}ms ease`;
+  el.style.opacity = dir === 'in' ? '1' : '0';
+  await wait(dur);
+}
+
+/* ══ SCREEN TRANSITIONS ══ */
+let currentScreen = 1;
+let transitioning = false;
+const fadeOv = document.getElementById('fade');
+
+async function goTo(n) {
+  if (transitioning || n === currentScreen) return;
+  transitioning = true;
+  if (n === 2) Audio.init(); // zeker stellen ook bij auto-transitie
+  fadeOv.style.transition = 'opacity 0.7s ease';
+  fadeOv.style.opacity = '1';
+  await wait(700);
+  document.getElementById(`s${currentScreen}`).classList.remove('active');
+  currentScreen = n;
+  document.getElementById(`s${n}`).classList.add('active');
+  fadeOv.style.transition = 'opacity 0.9s ease';
+  fadeOv.style.opacity = '0';
+  await wait(900);
+  transitioning = false;
+  Audio.setScreen(n);
+  updateNav(n);
+  updateSkip(n);
+  if (n === 2) runS2();
+  if (n === 3) runS3();
+}
+
+/* ══ SCREEN 1 ══ */
+const s1vids = [document.getElementById('s1v1'), document.getElementById('s1v2')];
+let s1cur = 0;
+s1vids.forEach(v => { v.load(); v.play().catch(()=>{}); });
+setInterval(() => {
+  const nx = 1 - s1cur;
+  s1vids[nx].currentTime = 0; s1vids[nx].play().catch(()=>{});
+  s1vids[nx].classList.add('active'); s1vids[s1cur].classList.remove('active');
+  s1cur = nx;
+}, 8000);
+
+async function runS1() {
+  const t = document.getElementById('s1title');
+  t.classList.add('on');
+  await typewriter(t, 'Op zoek naar\nElkaar', 58);
+  document.getElementById('s1sub').classList.add('on');
+  await wait(600);
+  document.getElementById('s1bot').classList.add('on');
+}
+
+/* ══ SCREEN 2 ══ */
+async function runS2() {
+  const b1 = document.getElementById('b1');
+  const b2 = document.getElementById('b2');
+
+  // Beat 1
+  const t2 = document.getElementById('s2title');
+  t2.classList.add('on');
+  await typewriter(t2, 'De Opdracht', 65);
+  document.getElementById('s2sub').classList.add('on');
+  await wait(3000);
+
+  // Fade out beat 1
+  b1.style.transition = 'opacity 0.8s ease'; b1.style.opacity = '0';
+  await wait(900); b1.style.display = 'none';
+
+  // Beat 2
+  b2.style.display = 'block';
+  const q = document.getElementById('s2quote');
+  q.classList.add('on');
+  await typewriter(q,
+    '"Hoe kunnen academische studenten en ontwerpers\nelkaar versterken en gezamenlijk tot\n(rijk gevisualiseerde) adviezen komen m.h.t.\nprojecten rondom duurzaamheid?"',
+    36
+  );
+  document.getElementById('s2attr').classList.add('on');
+
+  // 3s then auto to screen 3
+  await wait(3000);
+  goTo(3);
+}
+
+/* ══ SCREEN 3 ══ */
+const s3vids = [0,1,2,3,4].map(i => document.getElementById(`v${i}`));
+let s3activeVid = 0;
+s3vids.forEach(v => { v.load(); v.play().catch(()=>{}); });
+
+function switchToVid(idx) {
+  if (idx === s3activeVid) return;
+  s3vids[idx].currentTime = 0; s3vids[idx].play().catch(()=>{});
+  s3vids[idx].classList.add('active');
+  s3vids[s3activeVid].classList.remove('active');
+  s3activeVid = idx;
+}
+
+// Each VO line: { text, vid }
+// vid: 0=city street, 1=drone, 2=people, 3=solar, 4=design team
+const voLines = [
+  { text: "Kerkrade is geen beroemde stad.",                                                               vid: 0 },
+  { text: "Het staat niet op de meeste lijstjes.",                                                         vid: 0 },
+  { text: "Maar wie hier rondloopt, begrijpt al snel",                                                     vid: 1 },
+  { text: "dat het een stad is met karakter.",                                                              vid: 1 },
+  { text: "Met geschiedenis die je kunt ruiken in de stenen.",                                             vid: 2 },
+  { text: "Met mensen die hier zijn geboren\nen nergens anders naartoe willen.",                           vid: 2 },
+  { text: "En met een opgave die niet om hen heen kan:",                                                   vid: 0 },
+  { text: "de energietransitie.",                                                                          vid: 0 },
+  { text: "Gasloos. Duurzaam. Toekomstbestendig.",                                                        vid: 3 },
+  { text: "Ruim 45.000 inwoners.",                                                                         vid: 1 },
+  { text: "Negentig procent van de woningen gebouwd vóór het jaar 2000.",                                  vid: 1 },
+  { text: "Bijna de helft huurwoning.",                                                                    vid: 2 },
+  { text: "Negen procent van de huishoudens leeft op of rondom het sociaal minimum.",                      vid: 2 },
+  { text: "Dit is de context waarin de energietransitie landt.",                                           vid: 3 },
+  { text: "Wij zijn studenten van Zuyd Hogeschool in Maastricht.",                                        vid: 0 },
+  { text: "De gemeente Kerkrade vroeg ons uit te zoeken\nhoe bewoners beter bereikt kunnen worden voor de energietransitie.", vid: 0 },
+  { text: "Wij zijn begonnen met die vraag.",                                                              vid: 4 },
+  { text: "Maar hoe langer we luisterden,\nhoe duidelijker het werd dat er een andere vraag achter zit.", vid: 4 },
+  { text: "Niet: hoe bereiken we de bewoners?",                                                            vid: 4 },
+  { text: "Maar: waarom vertrouwen ze ons niet?",                                                          vid: 4 },
+];
+
+async function showVO(item) {
+  const el = document.getElementById('voLine');
+  switchToVid(item.vid);
+  el.innerHTML = item.text.replace(/\n/g, '<br>');
+  el.classList.add('on');
+  await wait(4000);
+  el.classList.remove('on');
+  await wait(550);
+}
+
+async function runS3() {
+  const titleEl = document.getElementById('s3title');
+  const subEl   = document.getElementById('s3sub');
+
+  titleEl.classList.add('on');
+  await typewriter(titleEl, 'Kerkrade Limburg', 55);
+  subEl.classList.add('on');
+  await wait(1200);
+
+  for (const item of voLines) {
+    await showVO(item);
+  }
+}
+
+/* ══════════════════════════════════════
+   AUDIO ENGINE — twee echte audiobestanden
+   city-ambience.mp4  +  music.mp4
+   Muziek start op scherm 2, stad erbij op scherm 3
+══════════════════════════════════════ */
+const Audio = {
+  city: null, music: null, ready: false,
+
+  init() {
+    if (this.ready) return;
+    this.ready = true;
+    this.city  = document.getElementById('cityAudio');
+    this.music = document.getElementById('musicAudio');
+    this.city.volume  = 0;
+    this.music.volume = 0;
+  },
+
+  _fade(el, to, ms) {
+    if (!el) return;
+    const from = el.volume;
+    const steps = 60, tick = ms / steps, delta = (to - from) / steps;
+    let i = 0;
+    const id = setInterval(() => {
+      el.volume = Math.min(1, Math.max(0, el.volume + delta));
+      if (++i >= steps) { el.volume = to; clearInterval(id); }
+    }, tick);
+  },
+
+  setScreen(n) {
+    if (!this.ready) return;
+    if (n === 2) {
+      this.music.play().catch(() => {});
+      this._fade(this.music, 0.20, 2500);
+    }
+    if (n === 3) {
+      this.city.play().catch(() => {});
+      this._fade(this.city,  0.14, 2500);
+      this._fade(this.music, 0.12, 1500);
+    }
+  }
+};
+
+/* ══════════════════════════════════════
+   CHAPTER NAV
+══════════════════════════════════════ */
+// Mapping: scherm → hoofdstuk (1-gebaseerd)
+const screenToChapter = { 2: 1, 3: 1 }; // scherm 2 en 3 zijn beide hoofdstuk 1
+
+function updateNav(screenNum) {
+  const nav    = document.getElementById('chapNav');
+  const fill   = document.getElementById('navFill');
+  const chaps  = document.querySelectorAll('.chap');
+  const active = screenToChapter[screenNum] || 0;
+
+  if (screenNum >= 2) {
+    nav.classList.add('visible');
+  } else {
+    nav.classList.remove('visible');
+    return;
+  }
+
+  chaps.forEach(ch => {
+    const n = parseInt(ch.dataset.ch);
+    ch.classList.remove('active', 'visited', 'upcoming');
+    if (n === active)   ch.classList.add('active');
+    else if (n < active) ch.classList.add('visited');
+    else                 ch.classList.add('upcoming');
+  });
+
+  // Vullijn: percentage van actief hoofdstuk t.o.v. totaal
+  const pct = ((active - 1) / 4) * 100; // 5 hoofdstukken → 4 gaps
+  fill.style.width = pct + '%';
+}
+
+/* ══ SKIP BUTTON ══ */
+const skipLabels = { 1: 'De Opdracht', 2: 'Kerkrade', 3: null };
+
+function updateSkip(screenNum) {
+  const btn   = document.getElementById('skipBtn');
+  const label = document.getElementById('skipLabel');
+  const next  = skipLabels[screenNum];
+  if (next) {
+    label.textContent = next;
+    btn.classList.add('visible');
+  } else {
+    btn.classList.remove('visible');
+  }
+}
+
+function skipScreen() {
+  Audio.init(); // zeker stellen dat audio klaarstaat
+  if (currentScreen === 1) goTo(2);
+  else if (currentScreen === 2) goTo(3);
+}
+
+/* ══ NAVIGATION ══ */
+let clickLock = false;
+document.addEventListener('click', e => {
+  if (e.target.closest('#skipBtn'))  return; // skip button handled separately
+  if (e.target.closest('#chapNav'))  return; // nav handled separately
+  if (currentScreen === 1 && !clickLock) {
+    Audio.init();
+    clickLock = true;
+    goTo(2);
+    setTimeout(() => clickLock = false, 2500);
+  }
+});
+let wheelLock = false;
+document.addEventListener('wheel', e => {
+  if (wheelLock || currentScreen !== 1) return;
+  if (e.deltaY > 30) {
+    Audio.init();
+    goTo(2); wheelLock = true; setTimeout(() => wheelLock = false, 2500);
+  }
+}, { passive: true });
+let ty0 = 0;
+document.addEventListener('touchstart', e => { ty0 = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', e => {
+  if (currentScreen === 1 && ty0 - e.changedTouches[0].clientY > 40) {
+    Audio.init(); goTo(2);
+  }
+});
+
+/* ══ BOOT ══ */
+window.addEventListener('load', async () => {
+  await wait(200);
+  fadeOv.classList.add('off');
+  await wait(700);
+  updateSkip(1);
+  runS1();
+});
+</script>
+</body>
+</html>
